@@ -5,14 +5,14 @@ from io import BytesIO
 def consolidate_excels(excel_files):
     all_data = pd.DataFrame()
     for excel_file in excel_files:
-        # Dosyayı BytesIO nesnesine çevir
         if excel_file.type == 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-            bytes_data = BytesIO(excel_file.getvalue())
-            data = pd.read_excel(bytes_data)
-            all_data = pd.concat([all_data, data], ignore_index=True)
-        else:
-            st.error("Yalnızca '.xlsx' formatındaki dosyalar desteklenmektedir.")
-            return pd.DataFrame()  # Hatalı dosya tipi varsa boş bir DataFrame döndür
+            try:
+                bytes_data = BytesIO(excel_file.getvalue())
+                data = pd.read_excel(bytes_data)
+                all_data = pd.concat([all_data, data], ignore_index=True)
+            except Exception as e:
+                st.error(f"Dosya işlenirken bir hata oluştu: {excel_file.name}. Hata: {str(e)}")
+                return pd.DataFrame()  # Hata ile karşılaşıldığında boş bir DataFrame döndür
     return all_data
 
 st.title('Excel Dosyalarını Birleştir')
@@ -31,4 +31,3 @@ if uploaded_files:
             file_name="consolidated.xlsx",
             mime="application/vnd.ms-excel"
         )
-
